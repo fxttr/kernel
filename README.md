@@ -17,8 +17,6 @@ The first way is recommended if you just want to get up and running immediately 
 * Nix functions for building Rust and C kernel modules
 * QEMU VM support using Nix's built in functions for generating an initramfs
 * Remote GDB debugging through the VM
-* Comes with an editor that is configured to have language diagnostics for C and Rust development (can be disabled)
-* Out of tree rust-analyzer support
 
 ## Cloning the flake
 
@@ -132,12 +130,6 @@ Remote GDB debugging is activated through the `rungdb` command (`build/run-gdb.n
 ### initramfs
 
 The initial ram disk is built using the new [make-initrd-ng](https://github.com/NixOS/nixpkgs/tree/master/pkgs/build-support/kernel/make-initrd-ng). It is called through its [nix wrapper](https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/kernel/make-initrd-ng.nix) which safely copies the nix store packages needed over. To see how to include modules and other options see the builder, `build/initramfs.nix`.
-
-### Neovim Editor
-
-A neovim editor is provided that is set up for Nix, C (CCLS), and Rust (Rust-Analyzer). See my [neovim-flake](https://github.com/jordanisaacs/neovim-flake) for more details on how the configuration works. It is enabled by default but can be disabled in `flake.nix` by setting `enableEditor = false`.
-
-![editor preview](https://user-images.githubusercontent.com/19742638/201808644-68674027-277e-4d61-9ebe-e2197b570730.png)
 
 #### C
 

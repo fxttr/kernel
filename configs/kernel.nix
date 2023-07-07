@@ -5,27 +5,17 @@
   enableBPF,
   enableGdb,
   useRustForLinux,
+  linux,
 }: let
-  version = "6.1.4";
+  version = "6.4.0";
   localVersion = "-development";
 in {
   kernelArgs = {
     inherit enableRust enableGdb;
 
     inherit version;
-    src =
-      if useRustForLinux
-      then
-        builtins.fetchurl {
-          url = "https://github.com/Rust-for-Linux/linux/archive/bd123471269354fdd504b65b1f1fe5167cb555fc.tar.gz";
-          sha256 = "sha256-BcTrK9tiGgCsmYaKpS/Xnj/nsCVGA2Aoa1AktHBgbB0=";
-        }
-      else
-        pkgs.fetchurl {
-          url = "mirror://kernel/linux/kernel/v6.x/linux-${version}.tar.xz";
-          sha256 = "sha256-iqj2T6YLsTOBqWCNH++90FVeKnDECyx9BnGw1kqkVZ4=";
-        };
-
+    src = linux;
+    
     # Add kernel patches here
     kernelPatches = let
       fetchSet = lib.imap1 (i: hash: {

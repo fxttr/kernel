@@ -3,27 +3,30 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    neovim-flake.url = "github:jordanisaacs/neovim-flake";
+    linux = {
+      url = "git+file:./linux";
+      flake = false;
+    };
   };
 
   outputs = {
     self,
     nixpkgs,
-    neovim-flake,
+    linux,
+    ...
   }: let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
 
     # Flake options
     enableBPF = true;
-    enableRust = true;
-    enableEditor = true;
+    enableRust = false;
     enableGdb = true;
     useRustForLinux = false;
 
     buildLib = pkgs.callPackage ./build {};
 
-    linuxConfigs = pkgs.callPackage ./configs/kernel.nix {inherit enableBPF enableRust useRustForLinux enableGdb;};
+    linuxConfigs = pkgs.callPackage ./configs/kernel.nix {inherit enableBPF enableRust useRustForLinux enableGdb linux;};
     inherit (linuxConfigs) kernelArgs kernelConfig;
 
     # Config file derivation
@@ -75,15 +78,6 @@
 
     runQemu = buildLib.buildQemuCmd {inherit kernel initramfs enableGdb;};
     runGdb = buildLib.buildGdbCmd {inherit kernel modules;};
-
-    neovimPkg =
-      (neovim-flake.lib.neovimConfiguration {
-        inherit pkgs;
-        modules = [
-          (pkgs.callPackage ./configs/editor.nix {inherit enableRust;})
-        ];
-      })
-      .neovim;
 
     cModule = buildCModule {
       name = "helloworld";
@@ -137,7 +131,6 @@
           rustc
         ]
         ++ lib.optional enableGdb runGdb
-        ++ lib.optional enableEditor neovimPkg
         ++ lib.optionals enableRust [cargo rustfmt genRustAnalyzer];
       buildInputs = [pkgs.nukeReferences kernel.dev];
     in
