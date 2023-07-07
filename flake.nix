@@ -123,6 +123,14 @@
           gdb
           qemu
           pahole
+          flex
+          bison
+          bc
+          pkg-config
+          elfutils
+          openssl.dev
+          llvmPackages.clang
+          python3
 
           # static analysis
           flawfinder
