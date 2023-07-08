@@ -19,6 +19,7 @@
 		},
 		"files.associations": {
 			"*.h": "c"
-		}
+		},
+		"clang-format.style": ".clang-format"
 	}
 }
