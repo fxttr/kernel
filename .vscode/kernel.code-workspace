@@ -20,6 +20,7 @@
 		"files.associations": {
 			"*.h": "c"
 		},
-		"clang-format.style": ".clang-format"
+		"clang-format.style": ".clang-format",
+		"editor.formatOnSave": true
 	}
 }
