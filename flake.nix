@@ -130,7 +130,11 @@
           elfutils
           openssl.dev
           llvmPackages.clang
-          python3
+          (python3.withPackages (ps: with ps; [
+            GitPython
+            ply
+          ]))
+          codespell
 
           # static analysis
           flawfinder

@@ -1,0 +1,24 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "checkpatch",
+            "command": "perl ${workspaceRoot}/linux/scripts/checkpatch.pl --strict -f ${relativeFileDirname}/* | less",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Find Maintainer",
+            "command": "cd ${workspaceRoot}/linux; perl ${workspaceRoot}/linux/scripts/get_maintainer.pl --separator , --nokeywords --nogit --nogit-fallback --norolestats -f ../${relativeFile}; cd -"
+        },
+        {
+            "type": "shell",
+            "label": "Create Patch",
+            "command": "cd ${workspaceRoot}/linux; git show --pretty=oneline --abbrev-commit HEAD; cd -"
+        }
+    ]
+}

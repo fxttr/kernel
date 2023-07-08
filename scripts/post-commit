@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+exec git show --format=email HEAD | ./scripts/checkpatch.pl --strict --codespell
