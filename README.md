@@ -1,18 +1,10 @@
-# Kernel Module Flake
+# Kernel Flake
 
-A nix flake dedicated to making the developer tooling around kernel module development easier. There are two ways to use this flake:
-
-1. Clone this flake and start hacking.
-2. Add this flake as an input to your own flake and use the provided scripts and builder functions.
-
-The first way is recommended if you just want to get up and running immediately and start hacking. The second way is for someone who wants to integrate this into their own kernel module development process without keeping a thousand lines of Nix up to date.
+A nix flake dedicated to making the developer tooling around kernel development easier.
 
 ## Features
 
-* Compile a minimal kernel designed for debugging (Time to build on Ryzen 5 3600 - 6 cores):
-
-![time](https://user-images.githubusercontent.com/19742638/201808063-3315027f-44c6-4bd7-bf48-a835b1ffe096.png)
-
+* Compile a minimal kernel designed for debugging
 * Enabled by default Rust support & the ability to switch to the Rust-For-Linux branch
 * Nix functions for building Rust and C kernel modules
 * QEMU VM support using Nix's built in functions for generating an initramfs
@@ -47,56 +39,6 @@ vim helloworld.c        # Start editing!
 
 # exit and then nix develop .# or just direnv reload
 # to rebuild and update the runvm command
-```
-
-## Flake as an input
-
-The `lib.builders` output of the flake exposes all the components as Nix builder functions. You can use them to compile your own kernel, configfile, initramfs, and generate the `runvm` and `rungdb` commands. An example of how the functions are used is below. See the `flake.nix` file for more details, and the `build` directory for the arguments that can be passed to the builders.
-
-```nix
-{
-   inputs.kernelFlake.url = "github:jordanisaacs/kernel-module-flake";
-
-   outputs =  {
-     self,
-     nixpkgs,
-     kernelFlake
-   }: let
-     system = "x86_64-system";
-     pkgs = nixpkgs.legacyPackages.${system};
-
-     kernelLib = kernelFlake.lib.builders {inherit pkgs;};
-
-     buildRustModule = buildLib.buildRustModule {inherit kernel;};
-     buildCModule = buildLib.buildCModule {inherit kernel;};
-
-     configfile = buildLib.buildKernelConfig {
-       generateConfigFlags = {};
-       structuredExtraConfig = {};
-
-       inherit kernel nixpkgs;
-     };
-
-     kernel = buildLib.buildKernel {
-       inherit configfile;
-
-       src = ./kernel-src;
-       version = "";
-       modDirVersion = "";
-     };
-
-     modules = [exampleModule];
-
-     initramfs = buildLib.buildInitramfs {
-       inherit kernel modules;
-     };
-
-     exampleModule = buildCModule { name = "example-module"; src = ./.; };
-
-     runQemu = buildLib.buildQemuCmd {inherit kernel initramfs;};
-     runGdb = buildLib.buildGdbCmd {inherit kernel modules;};
-   in { };
-}
 ```
 
 ## How it works
