@@ -1,55 +1,25 @@
-{
-  pkgs,
-  lib ? pkgs.lib,
-  enableRust,
-  enableBPF,
-  enableGdb,
-  useRustForLinux,
-  linux,
-}: let
-  version = "6.4.0";
+{ pkgs
+, lib ? pkgs.lib
+, enableGdb
+, linux
+,
+}:
+let
+  version = "6.7.0-rc2";
   localVersion = "-development";
-in {
+in
+{
   kernelArgs = {
-    inherit enableRust enableGdb;
+    inherit enableGdb;
 
     inherit version;
     src = linux;
-    
-    # Add kernel patches here
-    kernelPatches = let
-      fetchSet = lib.imap1 (i: hash: {
-        # name = " "kbuild-v${builtins.toString i}";
-        patch = pkgs.fetchpatch {
-          inherit hash;
-          url = "https://lore.kernel.org/rust-for-linux/20230109204520.539080-${builtins.toString i}-ojeda@kernel.org/raw";
-        };
-      });
-
-      patches = fetchSet [
-        "sha256-6WTde8P8GkDcBwVnlS6jws126vU7TCxF6/pLgFZE5gc="
-        "sha256-2RBeX5vFN88GVgRkzwK/7Gzl2iSWr4OqkdqoSgJPml0="
-        "sha256-oyR4traQbjq0+OMVL8q6UZicBh43TKN1BlhZsCTy7aU="
-        "sha256-2RBeX5vFN88GVgRkzwK/7Gzl2iSWr4OqkdqoSgJPml0="
-        "sha256-05VnWFMMar7YILTHVh9RLueRlW00pk3CjGKT7XDb7D0="
-        "sha256-qOZaHfZMc7Y2A0LdDJDO3Zi7QbdsBxZZoPmYKahkznw="
-      ];
-    in
-      patches;
 
     inherit localVersion;
-    modDirVersion = let
-      appendV =
-        if useRustForLinux
-        then ".0-rc1"
-        else "";
-    in
-      version + appendV + localVersion;
+    modDirVersion = version + localVersion;
   };
 
   kernelConfig = {
-    inherit enableRust;
-
     # See https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/system/boot/kernel_config.nix
     structuredExtraConfig = with lib.kernel;
       {
@@ -117,19 +87,6 @@ in {
         MODULE_UNLOAD = yes;
 
         # FW_LOADER = yes;
-      }
-      // lib.optionalAttrs enableBPF {
-        BPF_SYSCALL = yes;
-        # Enable kprobes and kallsyms: https://www.kernel.org/doc/html/latest/trace/kprobes.html#configuring-kprobes
-        # Debug FS is be enabled (done above) to show registered kprobes in /sys/kernel/debug: https://www.kernel.org/doc/html/latest/trace/kprobes.html#the-kprobes-debugfs-interface
-        KPROBES = yes;
-        KALLSYMS_ALL = yes;
-      }
-      // lib.optionalAttrs enableRust {
-        GCC_PLUGINS = no;
-        RUST = yes;
-        RUST_OVERFLOW_CHECKS = yes;
-        RUST_DEBUG_ASSERTIONS = yes;
       }
       // lib.optionalAttrs enableGdb {
         DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT = yes;
