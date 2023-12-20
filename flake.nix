@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     linux = {
-      url = "git+file:./linux";
+      url = "git+file:./linux?shallow=1";
       flake = false;
     };
   };

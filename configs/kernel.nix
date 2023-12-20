@@ -5,7 +5,7 @@
 ,
 }:
 let
-  version = "6.7.0-rc2";
+  version = "6.7.0-rc6";
   localVersion = "-development";
 in
 {
