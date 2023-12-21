@@ -1,32 +1,33 @@
-{
-  lib,
-  buildEnv,
-  writeScript,
-  makeInitrdNG,
-  bash,
-  busybox,
-  kmod,
-}: {
-  kernel,
-  modules ? [],
-  extraBin ? {},
-  extraContent ? {},
-  storePaths ? [],
-  extraInit ? "",
-}: let
-  busyboxStatic = busybox.override {enableStatic = true;};
+{ lib
+, buildEnv
+, writeScript
+, makeInitrdNG
+, bash
+, busybox
+, kmod
+,
+}: { kernel
+   , modules ? [ ]
+   , extraBin ? { }
+   , extraContent ? { }
+   , storePaths ? [ ]
+   , extraInit ? ""
+   ,
+   }:
+let
+  busyboxStatic = busybox.override { enableStatic = true; };
 
   initrdBinEnv = buildEnv {
     name = "initrd-emergency-env";
     paths = map lib.getBin initrdBin;
-    pathsToLink = ["/bin" "/sbin"];
+    pathsToLink = [ "/bin" "/sbin" ];
     postBuild = lib.concatStringsSep "\n" (lib.mapAttrsToList (n: v: "ln -s ${v} $out/bin/${n}") extraBin);
   };
 
   moduleEnv = buildEnv {
     name = "initrd-modules";
     paths = modules;
-    pathsToLink = ["/lib/modules/${kernel.modDirVersion}/misc"];
+    pathsToLink = [ "/lib/modules/${kernel.modDirVersion}/misc" ];
   };
 
   content =
@@ -38,23 +39,24 @@
     }
     // extraContent;
 
-  initrdBin = [bash busyboxStatic kmod];
+  initrdBin = [ bash busyboxStatic kmod ];
 
   initialRamdisk = makeInitrdNG {
     compressor = "gzip";
     strip = false;
     contents =
-      map (path: {
-        object = path;
-        symlink = "";
-      })
-      storePaths
+      map
+        (path: {
+          object = path;
+          symlink = "";
+        })
+        storePaths
       ++ lib.mapAttrsToList
-      (n: v: {
-        object = v;
-        symlink = n;
-      })
-      content;
+        (n: v: {
+          object = v;
+          symlink = n;
+        })
+        content;
   };
 
   init = writeScript "init" ''
@@ -97,4 +99,4 @@
     exec setsid -c /bin/sh
   '';
 in
-  initialRamdisk
+initialRamdisk
