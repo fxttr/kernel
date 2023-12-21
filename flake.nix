@@ -92,7 +92,7 @@
               # static analysis
               flawfinder
               cppcheck
-              #sparse
+              sparse
             ]
             ++ lib.optional enableGdb runGdb;
           buildInputs = [ pkgs.nukeReferences kernel.dev ];
